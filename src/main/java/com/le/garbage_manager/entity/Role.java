@@ -1,4 +1,4 @@
 package com.le.garbage_manager.entity;
 
-public class Bill {
+public class Role {
 }
