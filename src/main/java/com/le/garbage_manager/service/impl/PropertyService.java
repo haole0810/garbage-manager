@@ -4,13 +4,13 @@ import com.le.garbage_manager.dto.PropertyResponeDTO;
 import com.le.garbage_manager.entity.Bill;
 import com.le.garbage_manager.entity.BillStatus;
 import com.le.garbage_manager.entity.Property;
+import com.le.garbage_manager.entity.PropertyType;
 import com.le.garbage_manager.repository.IPropertyRepository;
 import com.le.garbage_manager.service.IPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class PropertyService implements IPropertyService {
@@ -20,9 +20,8 @@ public class PropertyService implements IPropertyService {
         PropertyResponeDTO dto = new PropertyResponeDTO();
         dto.setId(pro.getId());
         dto.setOwnerName(pro.getOwner());
-        dto.setType(pro.getType());
-        dto.setAreaName(pro.getArea().getName());
-
+        dto.setAddressNumber(pro.getAddress());
+        dto.setFloor(pro.getFloor());
         if(pro.getBills()!=null){
             double deblt=pro.getBills().stream()
                     .filter(b->b.getStatus()==BillStatus.UNPAID)
@@ -35,22 +34,24 @@ public class PropertyService implements IPropertyService {
         return dto;
     }
     @Override
-    public List<PropertyResponeDTO> getPropertiesByArea(Long areaId) {
-        return propertyRepository.findByAreaId(areaId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<PropertyResponeDTO> getHousesByArea(Long areaId, String search, Pageable pageable) {
+        Page<Property> properties = propertyRepository.findByAreaIdAndTypeAndAddressContaining(
+                areaId, PropertyType.HOUSE, search, pageable);
+
+        return properties.map(this::convertToDTO);
     }
+
     @Override
-    public List<PropertyResponeDTO> getBuildingsByArea(Long areaId) {
-        return propertyRepository.findByAreaId(areaId).stream()
-                .filter(p -> p.getParent() == null)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }@Override
-    public List<PropertyResponeDTO> getPropertiesByParent(Long parentId) {
-        return propertyRepository.findAll().stream()
-                .filter(p -> p.getParent() != null && p.getParent().getId().equals(parentId))
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<PropertyResponeDTO> getApartmentsByArea(Long areaId, String search, Pageable pageable) {
+        return propertyRepository.findByAreaIdAndTypeAndParentIsNullAndAddressContaining(
+                areaId, PropertyType.APARTMENT_BUILDING, search, pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<PropertyResponeDTO> getPropertiesByParent(Long parentId, String search, Integer floor, Pageable pageable) {
+        // Nếu có floor (lầu) thì lọc theo lầu, nếu không thì hiện tất cả của parent đó
+        // Ở đây thầy dùng phương thức findByParentIdAndAddressContaining mặc định của em
+        return propertyRepository.findByParentWithFilter(parentId, search, floor, pageable)
+                .map(this::convertToDTO);
     }
 }

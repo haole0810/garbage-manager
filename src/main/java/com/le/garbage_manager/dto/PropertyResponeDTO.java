@@ -8,7 +8,6 @@ public class PropertyResponeDTO {
     private Long id;
     private String addressNumber;
     private String ownerName;
-    private PropertyType type;
-    private String areaName;
     private Double totalDebt;
+    private Integer floor;
 }

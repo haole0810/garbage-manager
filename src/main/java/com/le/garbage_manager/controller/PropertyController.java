@@ -16,16 +16,20 @@ public class PropertyController {
     @Autowired
     private IPropertyService propertyService;
 
-    @GetMapping("/area/{areaId}")
-    public ResponseEntity<List<PropertyResponeDTO>> getPropertiesByArea(@PathVariable Long areaId) {
-        List<PropertyResponeDTO> properties = propertyService.getPropertiesByArea(areaId);
-        return ResponseEntity.ok(properties);
+    @GetMapping("/area/{areaId}/houses")
+    public ResponseEntity<List<PropertyResponeDTO>> getHousesByArea(@PathVariable Long areaId) {
+        return ResponseEntity.ok(propertyService.getHousesByArea(areaId));
     }
-    @GetMapping("/area/{areaId}/buildings")
-    public ResponseEntity<List<PropertyResponeDTO>> getBuildingsByArea(@PathVariable Long areaId) {
-        return ResponseEntity.ok(propertyService.getBuildingsByArea(areaId));
+
+    // Lấy danh sách Chung cư (Chỉ lấy các tòa nhà gốc)
+    @GetMapping("/area/{areaId}/apartments")
+    public ResponseEntity<List<PropertyResponeDTO>> getApartmentsByArea(@PathVariable Long areaId) {
+        return ResponseEntity.ok(propertyService.getApartmentsByArea(areaId));
     }
+
+    // Giữ nguyên để lấy các Block/Tầng/Phòng của chung cư
     @GetMapping("/parent/{parentId}")
     public ResponseEntity<List<PropertyResponeDTO>> getSubUnits(@PathVariable Long parentId) {
-        return ResponseEntity.ok(propertyService.getPropertiesByParent(parentId));    }
+        return ResponseEntity.ok(propertyService.getPropertiesByParent(parentId));
+    }
 }

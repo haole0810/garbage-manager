@@ -11,7 +11,7 @@ public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Integer floor;
     private String address; // Số nhà
     private String owner;     // Tên chủ hộ
     private String phoneNumber;
